@@ -208,6 +208,12 @@
   ok('下单后购物车清空', A.totals().count === 0);
   ok('下单后 storage 清空', JSON.parse(localStorage.getItem(A.KEY_CART) || '[]').length === 0);
   ok('取餐号渲染到页面', byId('pickNo').textContent === A.state.result.pickNo);
+  ok('成功页有「复制订单」按钮', !!byId('copyOrder'));
+  ok('生成可复制的订单文本', !!A.state.result.copyText && A.state.result.copyText.indexOf('取餐号') >= 0,
+    (A.state.result.copyText || '').slice(0, 24));
+  ok('复制文本含合计与取餐方式', /合计 ¥/.test(A.state.result.copyText) && /自取|堂食/.test(A.state.result.copyText),
+    A.state.result.copyText.split('\n').slice(-1)[0]);
+  ok('版本号已渲染', /^v\d/.test(byId('appVer').textContent), byId('appVer').textContent);
 
   click(byId('doneAgain'));
   ok('再来一单回到菜单页', !byId('screenMenu').hidden && byId('screenDone').hidden);
@@ -343,6 +349,68 @@
 
   click(byId('syncClose'));
   click(byId('editToggle'));
+
+  /* ---------- 14. 每个菜品单独的规格 ---------- */
+  click(byId('editToggle'));
+  click(q('[data-act="edit"][data-id="f01"]'));
+  ok('表单里有规格来源选择', qa('#formSpecs [data-specmode]').length === 2, qa('#formSpecs [data-specmode]').length);
+
+  click(q('#formSpecs [data-specmode="item"]'));
+  ok('切到「本菜自定义」', A.state.form.customSpecs === true);
+  ok('出现「编辑本菜规格」入口', !!q('#formSpecs [data-editspec]'));
+
+  click(q('#formSpecs [data-editspec]'));
+  ok('本菜规格编辑器打开', !byId('specSheet').hidden);
+  q('#specBody .sg[data-gi="0"] .gname').value = '份量B';
+  qa('#specBody .sg[data-gi="0"] .sg-opt .delta')[1].value = '99';
+  click(byId('specSave'));
+  ok('表单里已带独立规格', (A.state.form.specGroups || [])[0].name === '份量B', (A.state.form.specGroups || [])[0]);
+
+  click(byId('formSave'));
+  var f01 = A.findItem('f01');
+  ok('菜品写入独立规格', Array.isArray(f01.specGroups) && f01.specGroups[0].name === '份量B', f01.specGroups && f01.specGroups[0]);
+  ok('列表显示「独立规格」标签', !!q('#list .tag-spec'));
+  ok('独立规格已落库', (localStorage.getItem(A.KEY_MENU) || '').indexOf('份量B') >= 0);
+
+  click(byId('editToggle'));
+  clickAdd('f01');
+  ok('弹窗用本菜规格', q('#skuGroups').textContent.indexOf('份量B') >= 0, q('#skuGroups').textContent.slice(0, 30));
+  click(q('#skuGroups [data-o="p2"]'));
+  ok('本菜大份加价 99 → 单价 100', byId('skuPrice').textContent.indexOf('100') >= 0, byId('skuPrice').textContent);
+  click(byId('skuClose'));
+
+  clickAdd('f04');
+  ok('其他菜仍用全局规格', q('#skuGroups').textContent.indexOf('份量B') < 0, q('#skuGroups').textContent.slice(0, 30));
+  click(q('#skuGroups [data-o="p2"]'));
+  ok('全局大份加价仍是 8 → 单价 9', byId('skuPrice').textContent.indexOf('9') >= 0, byId('skuPrice').textContent);
+  click(byId('skuClose'));
+
+  click(byId('resetBtn'));
+  ok('恢复默认后独立规格被清掉', !A.findItem('f01').specGroups);
+
+  /* ---------- 15. 远端菜单（menu.json）同步 ---------- */
+  var remote = {
+    categories: JSON.parse(JSON.stringify(A.data.categories)),
+    specGroups: JSON.parse(JSON.stringify(A.data.specGroups)),
+    toppings: JSON.parse(JSON.stringify(A.data.toppings)),
+    items: JSON.parse(JSON.stringify(A.data.items))
+  };
+  remote.items[0].name = '远端改的黄焖鸡';
+  ok('applyRemote 生效', A.applyRemote(remote) === true);
+  ok('本机菜单被远端覆盖', A.state.items[0].name === '远端改的黄焖鸡', A.state.items[0].name);
+  ok('页面已重新渲染', q('#list .dish-name').textContent === '远端改的黄焖鸡', q('#list .dish-name').textContent);
+
+  // 本机有本地改动时，不被远端覆盖
+  A.store.set(A.KEY_MENU, JSON.stringify(A.state.items));
+  var remote2 = JSON.parse(JSON.stringify(remote));
+  remote2.items[0].name = '另一个远端名字';
+  ok('本机改过则不覆盖', A.applyRemote(remote2) === false);
+  ok('仍保留本机版本', A.state.items[0].name === '远端改的黄焖鸡', A.state.items[0].name);
+  A.store.del(A.KEY_MENU);
+
+  // 脏数据不生效
+  ok('非法远端数据被忽略', A.applyRemote({ items: [] }) === false);
+  ok('非数组也被忽略', A.applyRemote({ items: 'x' }) === false);
 
   } catch (e) {
     fail++;

@@ -3,6 +3,8 @@
   'use strict';
 
   const DATA = window.MENU_DATA;
+  const APP_VERSION = 'v1.3.0';
+  const APP_UPDATED = '2026-11-19';
   const KEY_MENU = 'xyms.menu.v1';
   const KEY_SHOP = 'xyms.shop.v1';
   const KEY_ORDERS = 'xyms.orders.v1';
@@ -64,6 +66,8 @@
     odBody: $('#odBody'),
     odClose: $('#odClose'),
     doneOrders: $('#doneOrders'),
+    copyOrder: $('#copyOrder'),
+    appVer: $('#appVer'),
     shopLogo: $('#shopLogo'),
     shopLogoImg: $('#shopLogoImg'),
     shopLogoText: $('#shopLogoText'),
@@ -290,12 +294,23 @@
   }
 
   /* ---------- 购物车 ---------- */
-  function buildKey(itemId, picks, toppingIds) {
+  function buildKey(itemId, picks, toppingIds, groupKeys) {
     const t = (toppingIds || []).slice().sort().join(',');
-    const p = (state.specGroups || []).map(function (g) {
-      return (picks && picks[g.key]) || '-';
+    const keys = groupKeys || (state.specGroups || []).map(function (g) { return g.key; });
+    const p = keys.map(function (k) {
+      return (picks && picks[k]) || '-';
     }).join(',');
     return [itemId, p, t].join('|');
+  }
+
+  /* 取某个菜品实际生效的规格（本菜自定义优先，否则用全局） */
+  function effectiveSpecs(item) {
+    const hasOwn = !!(item && Array.isArray(item.specGroups) && item.specGroups.length);
+    return {
+      groups: hasOwn ? item.specGroups : (state.specGroups || []),
+      toppings: (item && Array.isArray(item.toppings)) ? item.toppings : (state.toppings || []),
+      custom: hasOwn
+    };
   }
 
   function addLine(line) {
@@ -362,7 +377,8 @@
 
     const html = sections.map(function (s) {
       const dishes = s.items.map(function (d) {
-        const tag = d.custom ? '<span class="tag-custom">自定义</span>' : '';
+        const tag = (d.custom ? '<span class="tag-custom">自定义</span>' : '') +
+          (d.specGroups && d.specGroups.length ? '<span class="tag-spec">独立规格</span>' : '');
         const from = d.specs ? '<span class="price-from"> 起</span>' : '';
         const actions = state.editMode
           ? '<div class="dish-actions">' +
@@ -463,12 +479,16 @@
 
   /* ---------- 规格弹层 ---------- */
   function openSku(item) {
+    const eff = effectiveSpecs(item);
     const picks = {};
-    (state.specGroups || []).forEach(function (g) {
+    eff.groups.forEach(function (g) {
       if (g.options && g.options.length) picks[g.key] = g.options[0].id;
     });
     state.sku = {
       itemId: item.id,
+      groups: eff.groups,
+      toppings: eff.toppings,
+      custom: eff.custom,
       picks: picks,
       toppingIds: [],
       qty: 1
@@ -482,13 +502,13 @@
     const item = findItem(sku.itemId);
     if (!item) return 0;
     let total = item.price;
-    state.specGroups.forEach(function (g) {
+    (sku.groups || []).forEach(function (g) {
       g.options.forEach(function (o) {
-        if (o.id === sku.picks[g.key]) total += o.delta || 0;
+        if (o.id === sku.picks[g.key]) total += Number(o.delta) || 0;
       });
     });
-    state.toppings.forEach(function (t) {
-      if (sku.toppingIds.indexOf(t.id) >= 0) total += t.price;
+    (sku.toppings || []).forEach(function (t) {
+      if (sku.toppingIds.indexOf(t.id) >= 0) total += Number(t.price) || 0;
     });
     return total;
   }
@@ -504,7 +524,7 @@
     el.skuDesc.textContent = item.desc;
     el.skuSales.textContent = '月售 ' + item.sales;
 
-    el.skuGroups.innerHTML = state.specGroups.map(function (g) {
+    el.skuGroups.innerHTML = (sku.groups || []).map(function (g) {
       const opts = g.options.map(function (o) {
         const on = sku.picks[g.key] === o.id ? ' on' : '';
         const delta = o.delta > 0 ? '<span class="opt-delta">+' + o.delta + '</span>' : '';
@@ -513,7 +533,7 @@
       return '<div class="grp"><div class="grp-title">' + esc(g.name) + '</div><div class="opts">' + opts + '</div></div>';
     }).join('');
 
-    el.skuToppings.innerHTML = state.toppings.map(function (t) {
+    el.skuToppings.innerHTML = (sku.toppings || []).map(function (t) {
       const on = sku.toppingIds.indexOf(t.id) >= 0 ? ' on' : '';
       return '<button class="opt' + on + '" data-t="' + t.id + '">' + esc(t.name) + '<span class="opt-delta">+' + t.price + '</span></button>';
     }).join('');
@@ -527,17 +547,17 @@
     const item = findItem(sku.itemId);
     if (!item) return;
     const labels = [];
-    state.specGroups.forEach(function (g) {
+    (sku.groups || []).forEach(function (g) {
       g.options.forEach(function (o) {
         if (o.id === sku.picks[g.key]) labels.push(o.name);
       });
     });
-    state.toppings.forEach(function (t) {
+    (sku.toppings || []).forEach(function (t) {
       if (sku.toppingIds.indexOf(t.id) >= 0) labels.push(t.name);
     });
 
     addLine({
-      key: buildKey(item.id, sku.picks, sku.toppingIds),
+      key: buildKey(item.id, sku.picks, sku.toppingIds, (sku.groups || []).map(function (g) { return g.key; })),
       itemId: item.id,
       name: item.name,
       initial: item.initial,
@@ -563,7 +583,10 @@
         desc: item.desc === '店家新品' ? '' : item.desc,
         catId: item.catId,
         specs: !!item.specs,
-        image: item.image || ''
+        image: item.image || '',
+        customSpecs: !!(item.specGroups && item.specGroups.length),
+        specGroups: item.specGroups ? JSON.parse(JSON.stringify(item.specGroups)) : null,
+        toppings: item.toppings ? JSON.parse(JSON.stringify(item.toppings)) : null
       };
       el.formTitle.textContent = '编辑菜品';
     } else {
@@ -574,7 +597,10 @@
         desc: '',
         catId: state.activeCat || state.categories[0].id,
         specs: true,
-        image: ''
+        image: '',
+        customSpecs: false,
+        specGroups: null,
+        toppings: null
       };
       el.formTitle.textContent = '新增菜品';
     }
@@ -596,9 +622,24 @@
   }
 
   function renderFormSpecs() {
-    el.formSpecs.innerHTML =
-      '<button class="chip' + (state.form.specs ? ' on' : '') + '" data-specs="1">需要选规格</button>' +
-      '<button class="chip' + (!state.form.specs ? ' on' : '') + '" data-specs="0">直接加购</button>';
+    const f = state.form;
+    let html =
+      '<button class="chip' + (f.specs ? ' on' : '') + '" data-specs="1">需要选规格</button>' +
+      '<button class="chip' + (!f.specs ? ' on' : '') + '" data-specs="0">直接加购</button>';
+
+    if (f.specs) {
+      html += '<div class="spec-src">' +
+        '<button class="chip sm' + (!f.customSpecs ? ' on' : '') + '" data-specmode="global">跟随全局</button>' +
+        '<button class="chip sm' + (f.customSpecs ? ' on' : '') + '" data-specmode="item">本菜自定义</button>' +
+        '</div>';
+      if (f.customSpecs) {
+        html += '<div class="spec-summary">' +
+          '本菜：' + (f.specGroups || []).length + ' 个规格组 · ' + (f.toppings || []).length + ' 种加料' +
+          '<button class="link-btn" data-editspec="1">编辑本菜规格</button>' +
+          '</div>';
+      }
+    }
+    el.formSpecs.innerHTML = html;
   }
 
   function renderFormImage() {
@@ -648,10 +689,12 @@
         return Object.assign({}, it, {
           name: name,
           price: price,
-          desc: (el.formDesc.value || '').trim() || it.desc || '店家新品',
+          desc: (el.formDesc.value || '').trim(),
           catId: f.catId,
           specs: f.specs,
           image: f.image,
+          specGroups: f.customSpecs ? JSON.parse(JSON.stringify(f.specGroups || [])) : null,
+          toppings: f.customSpecs ? JSON.parse(JSON.stringify(f.toppings || [])) : null,
           initial: name.charAt(0)
         });
       });
@@ -663,13 +706,15 @@
         id: 'custom_' + Date.now().toString(36),
         catId: f.catId,
         name: name,
-        desc: (el.formDesc.value || '').trim() || '店家新品',
+        desc: (el.formDesc.value || '').trim(),
         price: price,
         sales: 0,
         initial: name.charAt(0),
         bg: pal[(Math.random() * pal.length) | 0],
         image: f.image,
         specs: f.specs,
+        specGroups: f.customSpecs ? JSON.parse(JSON.stringify(f.specGroups || [])) : null,
+        toppings: f.customSpecs ? JSON.parse(JSON.stringify(f.toppings || [])) : null,
         custom: true
       });
     }
@@ -763,10 +808,15 @@
     return ok;
   }
 
-  function openSpecEditor() {
+  let specTarget = 'global';   // 'global' | 'item'
+
+  function openSpecEditor(mode) {
+    specTarget = mode === 'item' ? 'item' : 'global';
+    const srcGroups = specTarget === 'item' ? (state.form.specGroups || state.specGroups) : state.specGroups;
+    const srcTops = specTarget === 'item' ? (state.form.toppings || state.toppings) : state.toppings;
     specDraft = {
-      specGroups: JSON.parse(JSON.stringify(state.specGroups)),
-      toppings: JSON.parse(JSON.stringify(state.toppings))
+      specGroups: JSON.parse(JSON.stringify(srcGroups || [])),
+      toppings: JSON.parse(JSON.stringify(srcTops || []))
     };
     renderSpecSheet();
     openSheet(el.specSheet);
@@ -804,7 +854,11 @@
     }).join('');
 
     el.specBody.innerHTML =
-      '<div class="spec-hint">这些规格会出现在菜品「＋」弹窗里；加价按每个选项单独设置。改完点保存。</div>' +
+      '<div class="spec-hint">' +
+      (specTarget === 'item'
+        ? '只影响当前这道菜；保存后回到菜品表单，再点「保存」才会写入菜单。'
+        : '全局规格：所有「跟随全局」的菜品都会用这套；加价按选项单独设置。') +
+      '</div>' +
       groups +
       '<button class="add-row" data-addgroup="1">＋ 添加规格组</button>' +
       '<div class="spec-sep"></div>' +
@@ -866,6 +920,16 @@
         return { id: t.id || uid('t'), name: (t.name || '').trim(), price: Number(t.price) || 0 };
       })
       .filter(function (t) { return t.name; });
+
+    if (specTarget === 'item') {
+      state.form.specGroups = groups;
+      state.form.toppings = tops;
+      state.form.customSpecs = true;
+      closeSheet(el.specSheet);
+      renderFormSpecs();
+      toast('已应用到本菜，记得点保存');
+      return;
+    }
 
     state.specGroups = groups;
     state.toppings = tops;
@@ -1053,6 +1117,19 @@
     saveCart();
     renderCartBar();
 
+    // 生成可复制的订单文本（方便顾客直接发到店里）
+    const itemLines = state.order.lines.map(function (l) {
+      return l.name + (l.specText ? ' ' + l.specText : '') + ' ×' + l.qty +
+        '  ¥' + money2(l.unitPrice * l.qty);
+    }).join('\n');
+    state.result.copyText =
+      '【新订单】取餐号 ' + state.result.pickNo + '\n' +
+      '订单号 ' + state.result.orderNo + ' · ' + state.result.time + '\n' +
+      '----------------\n' + itemLines + '\n' +
+      '共 ' + state.result.count + ' 件，合计 ¥' + money2(state.result.total) + '\n' +
+      (state.result.mode === 'dine' ? '堂食 · 桌号 ' + (state.result.tableNo || '未填') : '到店自取') +
+      ((el.remark.value || '').trim() ? ' · 备注：' + el.remark.value.trim() : '');
+
     el.pickNo.textContent = state.result.pickNo;
     el.orderNo.textContent = state.result.orderNo;
     el.orderTime.textContent = state.result.time;
@@ -1062,6 +1139,31 @@
     el.screenOrder.hidden = true;
     el.screenDone.hidden = false;
     toast('下单成功');
+  }
+
+  function copyOrderText() {
+    const text = (state.result && state.result.copyText) || '';
+    if (!text) { toast('没有可复制的订单'); return; }
+    let ok = false;
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (e) { ok = false; }
+    if (!ok && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        toast('已复制，去微信发给店家');
+      }).catch(function () {
+        toast('复制失败，请手动长按选择');
+      });
+      return;
+    }
+    toast(ok ? '已复制，去微信发给店家' : '复制失败，请手动长按选择');
   }
 
   function screens(name) {
@@ -1174,6 +1276,53 @@
     toast('已清空历史订单');
   }
 
+  /* ---------- 远端菜单（menu.json）---------- */
+  function applyRemote(remote) {
+    if (!remote || !Array.isArray(remote.items) || !remote.items.length) return false;
+    // 本机有编辑过的菜单时不覆盖，尊重本地改动
+    if (store.get(KEY_MENU)) return false;
+
+    const before = JSON.stringify({ c: DATA.categories, i: DATA.items, s: DATA.specGroups, t: DATA.toppings });
+    if (Array.isArray(remote.categories) && remote.categories.length) DATA.categories = remote.categories;
+    if (Array.isArray(remote.specGroups)) DATA.specGroups = remote.specGroups;
+    if (Array.isArray(remote.toppings)) DATA.toppings = remote.toppings;
+    DATA.items = remote.items;
+    if (remote.shop) DATA.shop = Object.assign({}, DATA.shop, remote.shop);
+
+    const after = JSON.stringify({ c: DATA.categories, i: DATA.items, s: DATA.specGroups, t: DATA.toppings });
+    if (before === after) return false;
+
+    state.categories = DATA.categories.slice();
+    state.specGroups = DATA.specGroups;
+    state.toppings = DATA.toppings;
+    state.items = JSON.parse(JSON.stringify(DATA.items));
+    state.activeCat = state.categories.length ? state.categories[0].id : '';
+    renderShop();
+    renderCats();
+    renderList();
+    return true;
+  }
+
+  function refreshFromRemote() {
+    if (typeof fetch !== 'function') return;
+    let timer = null;
+    let opts = { cache: 'no-store' };
+    if (typeof AbortController === 'function') {
+      const ctrl = new AbortController();
+      opts.signal = ctrl.signal;
+      timer = setTimeout(function () { ctrl.abort(); }, 3500);
+    }
+    fetch('menu.json?t=' + Date.now(), opts)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (remote) {
+        if (timer) clearTimeout(timer);
+        if (applyRemote(remote)) toast('菜单已更新');
+      })
+      .catch(function () {
+        if (timer) clearTimeout(timer);
+      });
+  }
+
   /* ---------- 事件 ---------- */
   function bind() {
     renderShop();
@@ -1243,7 +1392,7 @@
       if (act === 'add') {
         const item = findItem(id);
         if (!item) return;
-        if (item.specs) openSku(item);
+        if (item.specs && effectiveSpecs(item).groups.length) openSku(item);
         else {
           addLine({
             key: buildKey(item.id, {}, []),
@@ -1399,10 +1548,31 @@
     });
 
     el.formSpecs.addEventListener('click', function (e) {
-      const btn = e.target.closest('[data-specs]');
+      const btn = e.target.closest('[data-specs],[data-specmode],[data-editspec]');
       if (!btn) return;
-      state.form.specs = btn.dataset.specs === '1';
-      renderFormSpecs();
+
+      if (btn.dataset.specs !== undefined) {
+        state.form.specs = btn.dataset.specs === '1';
+        if (!state.form.specs) state.form.customSpecs = false;
+        renderFormSpecs();
+        return;
+      }
+
+      if (btn.dataset.specmode !== undefined) {
+        if (btn.dataset.specmode === 'item') {
+          if (!state.form.specGroups) state.form.specGroups = JSON.parse(JSON.stringify(state.specGroups));
+          if (!state.form.toppings) state.form.toppings = JSON.parse(JSON.stringify(state.toppings));
+          state.form.customSpecs = true;
+        } else {
+          state.form.customSpecs = false;
+        }
+        renderFormSpecs();
+        return;
+      }
+
+      if (btn.dataset.editspec !== undefined) {
+        openSpecEditor('item');
+      }
     });
 
     el.formName.addEventListener('input', function () { state.form.name = this.value; });
@@ -1439,6 +1609,9 @@
     el.tableNo.addEventListener('input', function () { state.order.tableNo = this.value; });
     el.remark.addEventListener('input', function () { state.order.remark = this.value; });
 
+    if (el.copyOrder) el.copyOrder.addEventListener('click', copyOrderText);
+    if (el.appVer) el.appVer.textContent = APP_VERSION + ' · ' + APP_UPDATED;
+
     el.doneAgain.addEventListener('click', function () {
       state.order.mode = 'self';
       state.order.tableNo = '';
@@ -1471,6 +1644,7 @@
   renderList();
   renderCartBar();
   screens('menu');
+  refreshFromRemote();
 
   /* 供自测与调试 */
   window.__app = {
@@ -1504,6 +1678,7 @@
     specDraft: function () { return specDraft; },
     syncText: syncText,
     applySync: applySync,
+    applyRemote: applyRemote,
     openSync: openSync,
     loadOrders: loadOrders,
     saveOrders: saveOrders,

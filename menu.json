@@ -1,0 +1,481 @@
+{
+  "shop": {
+    "name": "小羊吃遍全宇宙",
+    "hours": "营业中 10:00-21:30",
+    "logo": ""
+  },
+  "categories": [
+    {
+      "id": "c1",
+      "name": "鸡肉"
+    },
+    {
+      "id": "c2",
+      "name": "牛肉"
+    },
+    {
+      "id": "c3",
+      "name": "猪肉"
+    },
+    {
+      "id": "c4",
+      "name": "羊肉"
+    },
+    {
+      "id": "c5",
+      "name": "海鲜"
+    },
+    {
+      "id": "c6",
+      "name": "小炒"
+    },
+    {
+      "id": "c7",
+      "name": "素菜"
+    },
+    {
+      "id": "c8",
+      "name": "汤品"
+    },
+    {
+      "id": "c9",
+      "name": "其他"
+    },
+    {
+      "id": "c10",
+      "name": "甜品"
+    },
+    {
+      "id": "c11",
+      "name": "饮品"
+    }
+  ],
+  "specGroups": [
+    {
+      "key": "portion",
+      "name": "份量",
+      "options": [
+        {
+          "id": "p1",
+          "name": "小份",
+          "delta": 0
+        },
+        {
+          "id": "p2",
+          "name": "大份",
+          "delta": 8
+        }
+      ]
+    },
+    {
+      "key": "spicy",
+      "name": "辣度",
+      "options": [
+        {
+          "id": "s0",
+          "name": "不辣",
+          "delta": 0
+        },
+        {
+          "id": "s1",
+          "name": "微辣",
+          "delta": 0
+        },
+        {
+          "id": "s2",
+          "name": "中辣",
+          "delta": 0
+        },
+        {
+          "id": "s3",
+          "name": "特辣",
+          "delta": 0
+        }
+      ]
+    }
+  ],
+  "toppings": [
+    {
+      "id": "rice",
+      "name": "加米饭",
+      "price": 2
+    },
+    {
+      "id": "egg",
+      "name": "加卤蛋",
+      "price": 3
+    },
+    {
+      "id": "veg",
+      "name": "加青菜",
+      "price": 4
+    },
+    {
+      "id": "noodle",
+      "name": "加面",
+      "price": 3
+    }
+  ],
+  "items": [
+    {
+      "id": "f01",
+      "catId": "c1",
+      "name": "黄焖鸡",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "黄",
+      "bg": "linear-gradient(135deg,#A9603A,#D9A06B)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f02",
+      "catId": "c1",
+      "name": "辣子鸡丁",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "辣",
+      "bg": "linear-gradient(135deg,#B2402F,#D9785E)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f03",
+      "catId": "c1",
+      "name": "盐焗鸡腿",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "盐",
+      "bg": "linear-gradient(135deg,#C08A3E,#E5C079)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f04",
+      "catId": "c2",
+      "name": "番茄炖牛腩",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "番",
+      "bg": "linear-gradient(135deg,#B34B38,#DE8A6C)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f05",
+      "catId": "c2",
+      "name": "黑椒牛柳",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "黑",
+      "bg": "linear-gradient(135deg,#5A4638,#9C836C)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f06",
+      "catId": "c2",
+      "name": "牛肉粉丝汤",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "牛",
+      "bg": "linear-gradient(135deg,#8A6A4B,#C7A87F)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f07",
+      "catId": "c3",
+      "name": "红烧肉",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "红",
+      "bg": "linear-gradient(135deg,#8E3A2E,#C9775F)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f08",
+      "catId": "c3",
+      "name": "糖醋里脊",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "糖",
+      "bg": "linear-gradient(135deg,#C0563C,#E79A78)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f09",
+      "catId": "c3",
+      "name": "回锅肉",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "回",
+      "bg": "linear-gradient(135deg,#9C4A32,#CE8763)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f10",
+      "catId": "c4",
+      "name": "孜然羊肉",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "孜",
+      "bg": "linear-gradient(135deg,#7E4A2E,#B98A5E)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f11",
+      "catId": "c4",
+      "name": "清汤羊肉",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "清",
+      "bg": "linear-gradient(135deg,#8C7256,#C4AE8F)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f12",
+      "catId": "c5",
+      "name": "蒜蓉粉丝虾",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "蒜",
+      "bg": "linear-gradient(135deg,#B3553C,#E09579)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f13",
+      "catId": "c5",
+      "name": "清蒸鲈鱼",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "清",
+      "bg": "linear-gradient(135deg,#4E7A82,#96BEC2)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f14",
+      "catId": "c6",
+      "name": "干煸四季豆",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "干",
+      "bg": "linear-gradient(135deg,#4F7A48,#9CBE83)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f15",
+      "catId": "c6",
+      "name": "农家小炒肉",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "农",
+      "bg": "linear-gradient(135deg,#3F6E4A,#8FB57F)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f16",
+      "catId": "c6",
+      "name": "番茄炒蛋",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "番",
+      "bg": "linear-gradient(135deg,#C25A34,#E9A46F)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f17",
+      "catId": "c7",
+      "name": "上汤娃娃菜",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "上",
+      "bg": "linear-gradient(135deg,#5C8A5E,#A9C99B)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f18",
+      "catId": "c7",
+      "name": "清炒时蔬",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "清",
+      "bg": "linear-gradient(135deg,#588A55,#A6C98F)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f19",
+      "catId": "c8",
+      "name": "番茄蛋花汤",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "番",
+      "bg": "linear-gradient(135deg,#C4703C,#E8AE7C)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f20",
+      "catId": "c8",
+      "name": "冬瓜排骨汤",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "冬",
+      "bg": "linear-gradient(135deg,#7C9E6B,#C2D6A8)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f21",
+      "catId": "c8",
+      "name": "菌菇土鸡汤",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "菌",
+      "bg": "linear-gradient(135deg,#A8832F,#DCC077)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f22",
+      "catId": "c8",
+      "name": "酸辣汤",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "酸",
+      "bg": "linear-gradient(135deg,#9C4B33,#D08B6A)",
+      "specs": true,
+      "image": ""
+    },
+    {
+      "id": "f23",
+      "catId": "c9",
+      "name": "白米饭",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "米",
+      "bg": "linear-gradient(135deg,#B7A98C,#E4DAC3)",
+      "specs": false,
+      "image": ""
+    },
+    {
+      "id": "f24",
+      "catId": "c9",
+      "name": "手工面",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "面",
+      "bg": "linear-gradient(135deg,#C0A16A,#E8D3A6)",
+      "specs": false,
+      "image": ""
+    },
+    {
+      "id": "f25",
+      "catId": "c9",
+      "name": "卤蛋",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "蛋",
+      "bg": "linear-gradient(135deg,#8C6A45,#C9A878)",
+      "specs": false,
+      "image": ""
+    },
+    {
+      "id": "f26",
+      "catId": "c9",
+      "name": "小咸菜",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "咸",
+      "bg": "linear-gradient(135deg,#7E8A4A,#B9C489)",
+      "specs": false,
+      "image": ""
+    },
+    {
+      "id": "f27",
+      "catId": "c10",
+      "name": "红豆双皮奶",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "红",
+      "bg": "linear-gradient(135deg,#B98A9C,#EBC9D2)",
+      "specs": false,
+      "image": ""
+    },
+    {
+      "id": "f28",
+      "catId": "c10",
+      "name": "杨枝甘露",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "杨",
+      "bg": "linear-gradient(135deg,#D98A2B,#F3C982)",
+      "specs": false,
+      "image": ""
+    },
+    {
+      "id": "f29",
+      "catId": "c11",
+      "name": "酸梅汤",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "酸",
+      "bg": "linear-gradient(135deg,#7A3B4A,#B87C86)",
+      "specs": false,
+      "image": ""
+    },
+    {
+      "id": "f30",
+      "catId": "c11",
+      "name": "无糖乌龙茶",
+      "desc": "",
+      "price": 1,
+      "sales": 0,
+      "initial": "无",
+      "bg": "linear-gradient(135deg,#5C8D6B,#BBD3B4)",
+      "specs": false,
+      "image": ""
+    }
+  ]
+}

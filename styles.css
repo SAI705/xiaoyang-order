@@ -1016,3 +1016,70 @@ body {
 
 /* 编辑条四个按钮时收窄 */
 .edit-bar .fab.ghost { flex: 0 0 auto; padding: 0 12px; }
+
+.done-copy {
+  margin-top: 12px;
+  width: 420px;
+  max-width: 100%;
+  height: 80px;
+  border-radius: 40px;
+  background: #1F2422;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.done-ver {
+  margin-top: 22px;
+  font-size: 10px;
+  color: #C2C8C4;
+  letter-spacing: .5px;
+}
+
+/* ===== 每菜独立规格 ===== */
+.tag-spec {
+  margin-left: 6px;
+  font-size: 9px;
+  color: #2F6B4F;
+  background: #E7F0EA;
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex: 0 0 auto;
+}
+
+.spec-src {
+  display: flex;
+  gap: 7px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.chip.sm {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+.spec-summary {
+  margin-top: 8px;
+  width: 100%;
+  font-size: 11px;
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.link-btn {
+  border: 0;
+  background: none;
+  color: var(--green);
+  font-size: 11px;
+  text-decoration: underline;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
