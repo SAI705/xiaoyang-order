@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2F6B4F">
+<title>小羊吃遍全宇宙 · 点餐</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ============ 点餐页 ============ -->
+  <section class="screen" id="screenMenu">
+    <header class="shop">
+      <div class="shop-logo" id="shopLogo" title="编辑模式下点击可换店铺图">
+        <img id="shopLogoImg" alt="" hidden>
+        <span id="shopLogoText">小</span>
+        <span class="logo-edit" id="shopLogoEdit" hidden>换图</span>
+      </div>
+      <div class="shop-main">
+        <div class="shop-name" id="shopName">小羊吃遍全宇宙</div>
+        <div class="shop-meta" id="shopMeta">营业中 10:00-21:30</div>
+      </div>
+      <button class="orders-btn" id="ordersBtn">订单</button>
+      <button class="edit-toggle" id="editToggle">编辑</button>
+    </header>
+
+    <div class="body">
+      <nav class="cats" id="cats"></nav>
+      <main class="list" id="list"></main>
+    </div>
+
+    <div class="edit-bar" id="editBar" hidden>
+      <button class="fab" id="addDishBtn">＋ 新增菜品</button>
+      <button class="fab ghost" id="specBtn">规格</button>
+      <button class="fab ghost" id="syncBtn">同步</button>
+      <button class="fab ghost" id="resetBtn">恢复默认</button>
+    </div>
+
+    <div class="cartbar">
+      <div class="cart-left" id="cartLeft">
+        <div class="cart-icon" id="cartIcon">🍜<span class="badge" id="cartBadge" hidden>0</span></div>
+        <div class="cart-info" id="cartInfo" hidden>
+          <div class="cart-total"><span class="rmb">¥</span><span id="cartTotal">0.00</span></div>
+          <div class="cart-tip">点击查看已选</div>
+        </div>
+        <div class="cart-empty" id="cartEmpty">还没选菜品</div>
+      </div>
+      <button class="pay" id="payBtn">去结算</button>
+    </div>
+  </section>
+
+  <!-- ============ 确认订单 ============ -->
+  <section class="screen" id="screenOrder" hidden>
+    <div class="order-body" id="orderBody">
+      <div class="shop-row">
+        <div class="shop-logo">
+          <img id="orderLogoImg" alt="" hidden>
+          <span id="orderLogoText">小</span>
+        </div>
+        <div class="shop-main">
+          <div class="shop-name" id="orderName">小羊吃遍全宇宙</div>
+          <div class="shop-meta" id="orderMeta">营业中 10:00-21:30</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">取餐方式</div>
+        <div class="modes">
+          <button class="mode on" id="modeSelf">
+            <div class="mode-name">到店自取</div>
+            <div class="mode-sub">做好后短信提醒</div>
+          </button>
+          <button class="mode" id="modeDine">
+            <div class="mode-name">堂食</div>
+            <div class="mode-sub">送到桌位</div>
+          </button>
+        </div>
+        <div class="table-row" id="tableRow" hidden>
+          <span class="label">桌号</span>
+          <input class="input" id="tableNo" placeholder="例如 A12" maxlength="10">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">商品清单</div>
+        <div id="orderLines"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">备注</div>
+        <input class="remark" id="remark" placeholder="口味、忌口等，例如：少油、不要辣">
+      </div>
+
+      <div class="card">
+        <div class="row"><span class="k">商品小计</span><span id="orderSubtotal">¥0.00</span></div>
+        <div class="row"><span class="k">打包费</span><span>¥0.00</span></div>
+        <div class="row total"><span class="k">合计</span><span class="price-big" id="orderTotal">¥0.00</span></div>
+      </div>
+
+      <div class="order-pad"></div>
+    </div>
+
+    <div class="bar">
+      <div class="bar-left">
+        <div class="bar-total"><span class="rmb">¥</span><span id="orderBarTotal">0.00</span></div>
+        <div class="bar-sub" id="orderBarCount">共 0 件</div>
+      </div>
+      <button class="bar-btn off" id="submitBtn">提交订单</button>
+    </div>
+  </section>
+
+  <!-- ============ 下单成功 ============ -->
+  <section class="screen" id="screenDone" hidden>
+    <div class="done">
+      <div class="done-circle">✓</div>
+      <div class="done-title">下单成功</div>
+      <div class="done-sub">请凭取餐号到吧台取餐</div>
+
+      <div class="pick">
+        <div class="pick-label">取餐号</div>
+        <div class="pick-no" id="pickNo">—</div>
+      </div>
+
+      <div class="done-card">
+        <div class="row"><span class="k">订单号</span><span id="orderNo">—</span></div>
+        <div class="row"><span class="k">下单时间</span><span id="orderTime">—</span></div>
+        <div class="row"><span class="k" id="doneCount">共 0 件</span><span class="price" id="doneTotal">¥0.00</span></div>
+      </div>
+
+      <div class="done-tip">预计 15 分钟内出餐，超时请找店员催一下</div>
+      <button class="done-btn" id="doneAgain">再来一单</button>
+      <button class="done-link" id="doneOrders">查看历史订单</button>
+    </div>
+  </section>
+
+  <!-- ============ 历史订单 ============ -->
+  <section class="screen" id="screenOrders" hidden>
+    <header class="oh">
+      <button class="oh-back" id="ordersBack" aria-label="返回">‹</button>
+      <div class="oh-title">历史订单</div>
+      <button class="oh-clear" id="ordersClear">清空</button>
+    </header>
+    <div class="oh-body">
+      <input class="oh-search" id="ordersSearch" placeholder="搜订单号 / 取餐号 / 菜品名">
+      <div class="oh-stat" id="ordersStat"></div>
+      <div id="ordersList"></div>
+      <div class="order-pad"></div>
+    </div>
+  </section>
+
+  <!-- ============ 遮罩 ============ -->
+  <div class="mask" id="mask" hidden></div>
+
+  <!-- ============ 已选清单 ============ -->
+  <div class="sheet" id="cartSheet" hidden>
+    <div class="sheet-head">
+      <span class="sheet-title">已选商品（<span id="cartCount">0</span>）</span>
+      <span>
+        <button class="sheet-clear" id="cartClear">清空</button>
+        <button class="sheet-close" id="cartClose">✕</button>
+      </span>
+    </div>
+    <div class="sheet-body" id="cartLines"></div>
+    <div class="sheet-pad"></div>
+  </div>
+
+  <!-- ============ 规格 ============ -->
+  <div class="sheet" id="skuSheet" hidden>
+    <div class="sku-head">
+      <div id="skuPicBox"></div>
+      <div class="sku-head-main">
+        <div class="sku-name" id="skuName"></div>
+        <div class="sku-desc" id="skuDesc"></div>
+        <div class="sku-sales" id="skuSales"></div>
+      </div>
+      <button class="sheet-close" id="skuClose">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div id="skuGroups"></div>
+      <div class="grp">
+        <div class="grp-title">加料<span class="grp-tip">可多选</span></div>
+        <div class="opts" id="skuToppings"></div>
+      </div>
+      <div class="sheet-pad"></div>
+    </div>
+    <div class="sku-foot">
+      <div class="sku-price" id="skuPrice"></div>
+      <div class="stepper">
+        <button class="step" id="skuMinus">−</button>
+        <span class="qty" id="skuQty">1</span>
+        <button class="step plus" id="skuPlus">+</button>
+      </div>
+      <button class="sku-add" id="skuAdd">加入购物车</button>
+    </div>
+  </div>
+
+  <!-- ============ 新增 / 编辑菜品 ============ -->
+  <div class="sheet" id="formSheet" hidden>
+    <div class="sheet-head">
+      <span class="sheet-title" id="formTitle">新增菜品</span>
+      <button class="sheet-close" id="formClose">✕</button>
+    </div>
+
+    <div class="form-body">
+      <div class="field">
+        <span class="label">图片</span>
+        <div class="uploader">
+          <button class="upload-box" id="formImgBox"><b>＋</b>上传图片</button>
+          <div class="upload-preview" id="formImgPreview" hidden>
+            <img id="formImg" alt="">
+            <button class="upload-del" id="formImgDel">✕</button>
+          </div>
+          <div class="upload-tip">jpg / png，自动压缩到 720px<br>不上传则用色块占位</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label">名称</span>
+        <input class="input" id="formName" placeholder="例如 红烧肉" maxlength="20">
+      </div>
+
+      <div class="field">
+        <span class="label">价格</span>
+        <input class="input" id="formPrice" type="number" inputmode="decimal" placeholder="0.0" min="0" step="0.1">
+        <span class="unit">元</span>
+      </div>
+
+      <div class="field">
+        <span class="label">描述</span>
+        <input class="input" id="formDesc" placeholder="选填，一句话卖点" maxlength="30">
+      </div>
+
+      <div class="field col">
+        <span class="label">分类</span>
+        <div class="chips" id="formCats"></div>
+      </div>
+
+      <div class="field col">
+        <span class="label">规格</span>
+        <div class="chips" id="formSpecs"></div>
+      </div>
+
+      <div class="sheet-pad"></div>
+    </div>
+
+    <div class="form-foot">
+      <button class="form-btn ghost" id="formCancel">取消</button>
+      <button class="form-btn main" id="formSave">保存</button>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*" hidden>
+  </div>
+
+  <!-- ============ 规格与加料编辑 ============ -->
+  <div class="sheet" id="specSheet" hidden>
+    <div class="sheet-head">
+      <span class="sheet-title">规格与加料</span>
+      <button class="sheet-close" id="specClose">✕</button>
+    </div>
+    <div class="sheet-body" id="specBody"></div>
+    <div class="form-foot">
+      <button class="form-btn ghost" id="specCancel">取消</button>
+      <button class="form-btn main" id="specSave">保存</button>
+    </div>
+  </div>
+
+  <!-- ============ 数据同步（导出 / 导入） ============ -->
+  <div class="sheet" id="syncSheet" hidden>
+    <div class="sheet-head">
+      <span class="sheet-title">数据同步</span>
+      <button class="sheet-close" id="syncClose">✕</button>
+    </div>
+    <div class="sheet-body">
+      <div class="sync-hint">
+        编辑内容只存在<b>这台设备</b>的浏览器里（localStorage），换设备/换浏览器看不到。
+        要同步：在改好的这台点「复制 JSON」或「导出文件」，到另一台点「导入并覆盖」。
+      </div>
+      <div class="sync-size" id="syncSize"></div>
+      <div class="sync-actions">
+        <button class="form-btn main" id="syncCopy">复制 JSON</button>
+        <button class="form-btn ghost" id="syncDownload">导出文件</button>
+      </div>
+
+      <div class="sync-split">导入到本机</div>
+      <textarea class="sync-input" id="syncInput" placeholder="把导出的 JSON 粘贴到这里，或点下面的「选择文件」"></textarea>
+      <div class="sync-actions">
+        <button class="form-btn ghost" id="syncPick">选择文件</button>
+        <button class="form-btn main" id="syncApply">导入并覆盖</button>
+      </div>
+      <input type="file" id="syncFile" accept=".json,application/json" hidden>
+      <div class="sheet-pad"></div>
+    </div>
+  </div>
+
+  <!-- ============ 历史订单详情 ============ -->
+  <div class="sheet" id="odSheet" hidden>
+    <div class="sheet-head">
+      <span class="sheet-title" id="odTitle">订单详情</span>
+      <button class="sheet-close" id="odClose">✕</button>
+    </div>
+    <div class="sheet-body" id="odBody"></div>
+    <div class="sheet-pad"></div>
+  </div>
+
+  <input type="file" id="shopFileInput" accept="image/*" hidden>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+  // 自测：地址后加 ?selftest=1
+  if (location.search.indexOf('selftest') >= 0) {
+    var s = document.createElement('script');
+    s.src = 'selftest.js';
+    document.body.appendChild(s);
+  }
+</script>
+</body>
+</html>
